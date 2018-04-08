@@ -12,13 +12,19 @@ fn main() {
 }
 
 mod jzero {
-    pub fn update(_mdl: &mut Mdl, _msg: Msg) {}
+    use patchgl::material::components::button_bar::*;
+    use patchgl::material::Palette;
+    pub use self::update::*;
+    pub use self::draw::*;
 
     #[derive(Clone, PartialEq, Debug)]
     pub struct Mdl {
+        button_bar_mdl: ButtonBarMdl,
+        palette: Palette,
         card: RecallCard,
         view_state: ViewState,
     }
+
 
     #[derive(Clone, PartialEq, Debug)]
     pub struct RecallCard {
@@ -33,35 +39,67 @@ mod jzero {
         Performance,
     }
 
-    impl Default for Mdl {
-        fn default() -> Self {
-            let card = RecallCard {
-                english: "mouth".into(),
-                progressive: "kuchi".into(),
-                kana: "くち".into(),
-                kanji: Some("口".into()),
-            };
-            let view_state = ViewState::Performance;
-            Mdl { card, view_state }
+    mod update {
+        use super::*;
+
+        pub fn update(mdl: &mut Mdl, msg: Msg) {
+            println!("Msg: {:?}", msg);
+            match msg {
+                Msg::ButtonBarMsg(msg) => update_button_bar(&mut mdl.button_bar_mdl, msg),
+                Msg::View => {}
+            }
+        }
+
+        #[derive(Clone, PartialEq, Debug)]
+        pub enum Msg {
+            ButtonBarMsg(ButtonBarMsg),
+            View,
+        }
+
+        impl Default for Mdl {
+            fn default() -> Self {
+                let palette = Palette::default();
+                let button_bar_mdl = ButtonBarMdl::default();
+                let card = RecallCard {
+                    english: "mouth".into(),
+                    progressive: "kuchi".into(),
+                    kana: "くち".into(),
+                    kanji: Some("口".into()),
+                };
+                let view_state = ViewState::Performance;
+                Mdl { palette, button_bar_mdl, card, view_state }
+            }
         }
     }
 
-    #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-    pub enum Msg {}
+    mod draw {
+        use super::*;
+        use patchgl::flood::*;
 
-    pub fn draw(mdl: &Mdl) -> Flood<Msg> {
-        let palette = Palette::default();
-        let card = match mdl.view_state {
-            ViewState::Performance => draw_performance(&palette, &mdl.card)
-        };
-        card + Flood::Color(palette.light_background)
-    }
+        pub fn draw(mdl: &Mdl) -> Flood<Msg> {
+            let card = match mdl.view_state {
+                ViewState::Performance => draw_performance(&mdl)
+            };
+            card + Flood::Color(mdl.palette.light_background_raised)
+        }
 
-    use patchgl::material::Palette;
-    use patchgl::flood::*;
-
-    fn draw_performance(palette: &Palette, card: &RecallCard) -> Flood<Msg> {
-        Flood::Text(card.english.to_owned(), palette.light_background_text_primary, Placement::Start)
-            + Padding::Uniform(Length::Cross * 0.4)
+        fn draw_performance(mdl: &Mdl) -> Flood<Msg> {
+            let button_bar = ButtonBar {
+                msg_wrap: Msg::ButtonBarMsg,
+                palette: &mdl.palette,
+                button_bar_mdl: &mdl.button_bar_mdl,
+                buttons: vec![
+                    Button {
+                        id: 38,
+                        label: "View".into(),
+                        intent: ButtonIntent::Call,
+                        click_msg: Msg::View,
+                    }
+                ],
+            };
+            Flood::Text(mdl.card.english.to_owned(), mdl.palette.light_background_text_primary, Placement::Start)
+                + Padding::Uniform(Length::Cross * 0.4)
+                + (Position::Bottom(Length::Spacing * 3), button_bar.into())
+        }
     }
 }
