@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["Jeffrey Yu <92849+wehjin@users.noreply.github.com>"]
 
 [dependencies]
+patchgl = { git = "https://github.com/wehjin/patchgl.git" }
