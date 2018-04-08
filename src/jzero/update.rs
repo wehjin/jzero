@@ -1,17 +1,14 @@
 use super::*;
 
 pub fn update(mdl: &mut Mdl, msg: Msg) {
-    println!("Msg: {:?}", msg);
+    println!("Msg: {:?}\n  Mdl: {:?}", msg, mdl);
     match msg {
         Msg::ButtonBarMsg(msg) => update_button_bar(&mut mdl.button_bar_mdl, msg),
-        Msg::View => {}
+        Msg::View => {
+            mdl.view_state = ViewState::Acquire;
+        }
+        Msg::Review => {}
     }
-}
-
-#[derive(Clone, PartialEq, Debug)]
-pub enum Msg {
-    ButtonBarMsg(ButtonBarMsg),
-    View,
 }
 
 impl Default for Mdl {
@@ -24,7 +21,7 @@ impl Default for Mdl {
             kana: "くち".into(),
             kanji: Some("口".into()),
         };
-        let view_state = ViewState::Performance;
+        let view_state = ViewState::Perform;
         Mdl { palette, button_bar_mdl, card, view_state }
     }
 }

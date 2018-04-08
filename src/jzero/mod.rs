@@ -11,7 +11,6 @@ pub struct Mdl {
     view_state: ViewState,
 }
 
-
 #[derive(Clone, PartialEq, Debug)]
 pub struct RecallCard {
     pub english: String,
@@ -22,7 +21,15 @@ pub struct RecallCard {
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum ViewState {
-    Performance,
+    Perform,
+    Acquire,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub enum Msg {
+    ButtonBarMsg(ButtonBarMsg),
+    View,
+    Review,
 }
 
 mod update;

@@ -1,7 +1,7 @@
 extern crate patchgl;
 
 fn main() {
-    window::start(640, 400, |window| {
+    window::start(768, 768, |window| {
         use patchgl::app::App;
         use self::jzero::*;
 
