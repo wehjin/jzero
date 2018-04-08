@@ -4,10 +4,15 @@ pub fn update(mdl: &mut Mdl, msg: Msg) {
     println!("Msg: {:?}\n  Mdl: {:?}", msg, mdl);
     match msg {
         Msg::ButtonBarMsg(msg) => update_button_bar(&mut mdl.button_bar_mdl, msg),
-        Msg::View => {
+        Msg::ViewAnswer => {
             mdl.view_state = ViewState::Acquire;
         }
-        Msg::Review => {}
+        Msg::Review => {
+            mdl.view_state = ViewState::Review;
+        }
+        Msg::RetestSoon => {}
+        Msg::RetestLater => {}
+        Msg::RetestMuchLater => {}
     }
 }
 

@@ -4,14 +4,6 @@ pub use self::update::*;
 pub use self::draw::*;
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct Mdl {
-    button_bar_mdl: ButtonBarMdl,
-    palette: Palette,
-    card: RecallCard,
-    view_state: ViewState,
-}
-
-#[derive(Clone, PartialEq, Debug)]
 pub struct RecallCard {
     pub english: String,
     pub progressive: String,
@@ -23,13 +15,25 @@ pub struct RecallCard {
 pub enum ViewState {
     Perform,
     Acquire,
+    Review,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct Mdl {
+    button_bar_mdl: ButtonBarMdl,
+    palette: Palette,
+    card: RecallCard,
+    view_state: ViewState,
 }
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Msg {
     ButtonBarMsg(ButtonBarMsg),
-    View,
+    ViewAnswer,
     Review,
+    RetestSoon,
+    RetestLater,
+    RetestMuchLater,
 }
 
 mod update;
