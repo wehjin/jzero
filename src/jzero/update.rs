@@ -1,4 +1,5 @@
 use super::*;
+use rand::{Rng, thread_rng};
 
 impl Update<JzeroMsg> for JzeroMdl {
     fn update(&mut self, msg: JzeroMsg) {
@@ -34,7 +35,9 @@ impl Update<JzeroMsg> for JzeroMdl {
                 let next_lesson = if candidates.is_empty() {
                     self.active_lesson.clone()
                 } else {
-                    let question = candidates[0].clone();
+                    let mut rng = thread_rng();
+                    let index = rng.gen_range(0, candidates.len());
+                    let question = candidates[index].clone();
                     Some(Lesson { question, progress: LessonProgress::Perform })
                 };
 
