@@ -21,7 +21,7 @@ pub enum JzeroMsg {
 pub struct JzeroMdl {
     button_bar_mdl: ButtonBarMdl,
     questions: Vec<Question>,
-    active_lesson: Lesson,
+    active_lesson: Option<Lesson>,
     lesson_results: HashMap<Question, LessonResult>,
 }
 
@@ -114,7 +114,7 @@ impl Default for JzeroMdl {
                     kanji: Some("歯".into()),
                 },
             ],
-            active_lesson: Lesson {
+            active_lesson: Some(Lesson {
                 question: Question::Recall {
                     english: "mouth".into(),
                     progressive: "kuchi".into(),
@@ -122,7 +122,7 @@ impl Default for JzeroMdl {
                     kanji: Some("口".into()),
                 },
                 progress: LessonProgress::Perform,
-            },
+            }),
             lesson_results: HashMap::new(),
         }
     }
@@ -136,21 +136,20 @@ impl Update<JzeroMsg> for JzeroMdl {
         match msg {
             JzeroMsg::ButtonBarMsg(msg) => update_button_bar(&mut self.button_bar_mdl, msg),
             JzeroMsg::ProceedToAnswer => {
-                let lesson = &mut self.active_lesson;
-                lesson.progress = LessonProgress::Acquire;
+                if let &mut Some(ref mut lesson) = &mut self.active_lesson {
+                    lesson.progress = LessonProgress::Acquire;
+                }
             }
             JzeroMsg::ProceedToReview => {
-                let lesson = &mut self.active_lesson;
-                lesson.progress = LessonProgress::Review;
+                if let &mut Some(ref mut lesson) = &mut self.active_lesson {
+                    lesson.progress = LessonProgress::Review;
+                }
             }
             JzeroMsg::HardResult => {
-                {
-                    let question = self.active_lesson.question.clone();
+                if let &mut Some(ref mut lesson) = &mut self.active_lesson {
+                    let question = lesson.question.clone();
                     let results = &mut self.lesson_results;
                     results.insert(question, LessonResult::Hard(Utc::now()));
-                }
-                {
-                    let lesson = &mut self.active_lesson;
                     lesson.progress = LessonProgress::Perform;
                 }
             }
