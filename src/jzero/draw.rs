@@ -45,7 +45,7 @@ pub fn draw_perform(mdl: &JzeroMdl, palette: &Palette, active_lesson: &Lesson) -
         buttons: vec![
             Button {
                 id: 38,
-                label: "Reveal".into(),
+                label: "Check Answer".into(),
                 intent: ButtonIntent::Call,
                 click_msg: JzeroMsg::ProceedToAnswer,
             }
@@ -71,7 +71,7 @@ pub fn draw_acquire(mdl: &JzeroMdl, palette: &Palette, active_lesson: &Lesson) -
         buttons: vec![
             Button {
                 id: 38,
-                label: "Review".into(),
+                label: "Incorrect / Hard".into(),
                 intent: ButtonIntent::Call,
                 click_msg: JzeroMsg::ProceedToReview,
             },
@@ -106,7 +106,7 @@ pub fn draw_review(mdl: &JzeroMdl, palette: &Palette, active_lesson: &Lesson) ->
         buttons: vec![
             Button {
                 id: 38,
-                label: "Hard (Repeat)".into(),
+                label: "Next Question".into(),
                 intent: ButtonIntent::Call,
                 click_msg: JzeroMsg::HardResult,
             },
@@ -115,12 +115,6 @@ pub fn draw_review(mdl: &JzeroMdl, palette: &Palette, active_lesson: &Lesson) ->
                 label: "Back".into(),
                 intent: ButtonIntent::Provide,
                 click_msg: JzeroMsg::ProceedToAnswer,
-            },
-            Button {
-                id: 40,
-                label: GOT_THIS.into(),
-                intent: ButtonIntent::Provide,
-                click_msg: JzeroMsg::GoodResult,
             },
         ],
     };

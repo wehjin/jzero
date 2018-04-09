@@ -5,4 +5,4 @@ authors = ["Jeffrey Yu <92849+wehjin@users.noreply.github.com>"]
 
 [dependencies]
 patchgl = { git = "https://github.com/wehjin/patchgl.git" }
-chrono = "0.4"
+chrono = "0.4.2"

@@ -1,11 +1,12 @@
 use ::traits::*;
 use chrono::prelude::*;
+use chrono::Duration;
 use patchgl::material::components::button_bar::*;
 use patchgl::material::Palette;
 use std::collections::HashMap;
 
-
 mod draw;
+mod update;
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum JzeroMsg {
@@ -33,6 +34,24 @@ pub enum Question {
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub enum LessonResult {
     Hard(DateTime<Utc>),
+}
+
+impl LessonResult {
+    pub fn time(&self) -> DateTime<Utc> {
+        match self {
+            &LessonResult::Hard(time) => time.clone()
+        }
+    }
+
+    pub fn rest_duration(&self) -> Duration {
+        match self {
+            &LessonResult::Hard(_) => Duration::minutes(0),
+        }
+    }
+
+    pub fn due_time(&self) -> DateTime<Utc> {
+        self.time() + self.rest_duration()
+    }
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -130,31 +149,3 @@ impl Default for JzeroMdl {
 
 impl Mdl<JzeroMsg> for JzeroMdl {}
 
-impl Update<JzeroMsg> for JzeroMdl {
-    fn update(&mut self, msg: JzeroMsg) {
-        println!("Msg: {:?}\n  Mdl: {:?}", msg, self);
-        match msg {
-            JzeroMsg::ButtonBarMsg(msg) => update_button_bar(&mut self.button_bar_mdl, msg),
-            JzeroMsg::ProceedToAnswer => {
-                if let &mut Some(ref mut lesson) = &mut self.active_lesson {
-                    lesson.progress = LessonProgress::Acquire;
-                }
-            }
-            JzeroMsg::ProceedToReview => {
-                if let &mut Some(ref mut lesson) = &mut self.active_lesson {
-                    lesson.progress = LessonProgress::Review;
-                }
-            }
-            JzeroMsg::HardResult => {
-                if let &mut Some(ref mut lesson) = &mut self.active_lesson {
-                    let question = lesson.question.clone();
-                    let results = &mut self.lesson_results;
-                    results.insert(question, LessonResult::Hard(Utc::now()));
-                    lesson.progress = LessonProgress::Perform;
-                }
-            }
-            JzeroMsg::GoodResult => {}
-            JzeroMsg::EasyResult => {}
-        }
-    }
-}
