@@ -6,7 +6,7 @@ use super::*;
 impl Draw<SessionMsg> for SessionMdl {
     fn draw(&self) -> Flood<SessionMsg> {
         let palette = &Palette::default();
-        if let Some(ref active_lesson) = self.active_lesson {
+        if let Some(ref active_lesson) = self.session.active_lesson {
             let active_content = match active_lesson.progress {
                 LessonProgress::Perform => draw_perform(self, palette, active_lesson),
                 LessonProgress::Acquire => draw_acquire(self, palette, active_lesson),
@@ -74,7 +74,7 @@ pub fn draw_acquire(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson)
         buttons: vec![
             Button {
                 id: 38,
-                label: "Incorrect / Hard".into(),
+                label: "Hard / Incorrect".into(),
                 intent: ButtonIntent::Call,
                 click_msg: SessionMsg::ProceedToReview,
             },
@@ -100,7 +100,7 @@ pub fn draw_acquire(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson)
 }
 
 pub fn draw_review(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SessionMsg> {
-    let title = "Review".into();
+    let title = "Say it again".into();
     let button_bar = ButtonBar {
         msg_wrap: SessionMsg::ButtonBarMsg,
         palette,

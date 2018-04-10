@@ -5,5 +5,10 @@ authors = ["Jeffrey Yu <92849+wehjin@users.noreply.github.com>"]
 
 [dependencies]
 patchgl = { git = "https://github.com/wehjin/patchgl.git" }
-chrono = "0.4.2"
+chrono = { version="0.4.2", features = ["serde"] }
 rand = "0.4.2"
+time = "0.1.39"
+lazy_static = "1.0.0"
+serde = "1.0.37"
+serde_derive = "1.0.37"
+serde_yaml = "0.7.3"
