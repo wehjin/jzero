@@ -3,8 +3,8 @@ use patchgl::material::components::button_bar::*;
 use patchgl::material::components::stepper::*;
 use super::*;
 
-impl Draw<JzeroMsg> for JzeroMdl {
-    fn draw(&self) -> Flood<JzeroMsg> {
+impl Draw<SessionMsg> for SessionMdl {
+    fn draw(&self) -> Flood<SessionMsg> {
         let palette = &Palette::default();
         if let Some(ref active_lesson) = self.active_lesson {
             let active_content = match active_lesson.progress {
@@ -17,7 +17,7 @@ impl Draw<JzeroMsg> for JzeroMdl {
                 LessonProgress::Acquire => 1,
                 LessonProgress::Review => 2,
             };
-            let stepper: Flood<JzeroMsg> = Stepper {
+            let stepper: Flood<SessionMsg> = Stepper {
                 palette,
                 id: vec![15],
                 active_index,
@@ -37,10 +37,10 @@ impl Draw<JzeroMsg> for JzeroMdl {
     }
 }
 
-pub fn draw_perform(mdl: &JzeroMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<JzeroMsg> {
+pub fn draw_perform(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SessionMsg> {
     let title = "Say it aloud".into();
     let button_bar = ButtonBar {
-        msg_wrap: JzeroMsg::ButtonBarMsg,
+        msg_wrap: SessionMsg::ButtonBarMsg,
         palette,
         button_bar_mdl: &mdl.button_bar_mdl,
         buttons: vec![
@@ -48,7 +48,7 @@ pub fn draw_perform(mdl: &JzeroMdl, palette: &Palette, active_lesson: &Lesson) -
                 id: 38,
                 label: "Check Answer".into(),
                 intent: ButtonIntent::Call,
-                click_msg: JzeroMsg::ProceedToAnswer,
+                click_msg: SessionMsg::ProceedToAnswer,
             }
         ],
     };
@@ -64,11 +64,11 @@ pub fn draw_perform(mdl: &JzeroMdl, palette: &Palette, active_lesson: &Lesson) -
 const GOT_THIS: &str = "Good (Revisit in 2d)";
 const EASY: &str = "Easy (Revisit in 1w)";
 
-pub fn draw_acquire(mdl: &JzeroMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<JzeroMsg> {
+pub fn draw_acquire(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SessionMsg> {
     let Question::Recall { ref english, ref kana, .. } = active_lesson.question;
     let title = format!("{}", english);
     let button_bar = ButtonBar {
-        msg_wrap: JzeroMsg::ButtonBarMsg,
+        msg_wrap: SessionMsg::ButtonBarMsg,
         palette,
         button_bar_mdl: &mdl.button_bar_mdl,
         buttons: vec![
@@ -76,19 +76,19 @@ pub fn draw_acquire(mdl: &JzeroMdl, palette: &Palette, active_lesson: &Lesson) -
                 id: 38,
                 label: "Incorrect / Hard".into(),
                 intent: ButtonIntent::Call,
-                click_msg: JzeroMsg::ProceedToReview,
+                click_msg: SessionMsg::ProceedToReview,
             },
             Button {
                 id: 40,
                 label: GOT_THIS.into(),
                 intent: ButtonIntent::Provide,
-                click_msg: JzeroMsg::GoodResult,
+                click_msg: SessionMsg::GoodResult,
             },
             Button {
                 id: 41,
                 label: EASY.into(),
                 intent: ButtonIntent::Provide,
-                click_msg: JzeroMsg::EasyResult,
+                click_msg: SessionMsg::EasyResult,
             }
         ],
     };
@@ -99,10 +99,10 @@ pub fn draw_acquire(mdl: &JzeroMdl, palette: &Palette, active_lesson: &Lesson) -
         + (Position::Bottom(Length::Spacing * 3), button_bar.into())
 }
 
-pub fn draw_review(mdl: &JzeroMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<JzeroMsg> {
+pub fn draw_review(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SessionMsg> {
     let title = "Review".into();
     let button_bar = ButtonBar {
-        msg_wrap: JzeroMsg::ButtonBarMsg,
+        msg_wrap: SessionMsg::ButtonBarMsg,
         palette,
         button_bar_mdl: &mdl.button_bar_mdl,
         buttons: vec![
@@ -110,13 +110,13 @@ pub fn draw_review(mdl: &JzeroMdl, palette: &Palette, active_lesson: &Lesson) ->
                 id: 38,
                 label: "Next Question".into(),
                 intent: ButtonIntent::Call,
-                click_msg: JzeroMsg::HardResult,
+                click_msg: SessionMsg::HardResult,
             },
             Button {
                 id: 39,
                 label: "Back".into(),
                 intent: ButtonIntent::Provide,
-                click_msg: JzeroMsg::ProceedToAnswer,
+                click_msg: SessionMsg::ProceedToAnswer,
             },
         ],
     };

@@ -1,22 +1,22 @@
 use super::*;
 use rand::{Rng, thread_rng};
 
-impl Update<JzeroMsg> for JzeroMdl {
-    fn update(&mut self, msg: JzeroMsg) {
+impl Update<SessionMsg> for SessionMdl {
+    fn update(&mut self, msg: SessionMsg) {
         println!("Msg: {:?}\n  Mdl: {:?}", msg, self);
         match msg {
-            JzeroMsg::ButtonBarMsg(msg) => update_button_bar(&mut self.button_bar_mdl, msg),
-            JzeroMsg::ProceedToAnswer => {
+            SessionMsg::ButtonBarMsg(msg) => update_button_bar(&mut self.button_bar_mdl, msg),
+            SessionMsg::ProceedToAnswer => {
                 if let &mut Some(ref mut lesson) = &mut self.active_lesson {
                     lesson.progress = LessonProgress::Acquire;
                 }
             }
-            JzeroMsg::ProceedToReview => {
+            SessionMsg::ProceedToReview => {
                 if let &mut Some(ref mut lesson) = &mut self.active_lesson {
                     lesson.progress = LessonProgress::Review;
                 }
             }
-            JzeroMsg::HardResult => {
+            SessionMsg::HardResult => {
                 let now = Utc::now();
                 self.save_active_lesson_result(LessonResult::Hard(now));
 
@@ -43,13 +43,13 @@ impl Update<JzeroMsg> for JzeroMdl {
 
                 self.active_lesson = next_lesson;
             }
-            JzeroMsg::GoodResult => {}
-            JzeroMsg::EasyResult => {}
+            SessionMsg::GoodResult => {}
+            SessionMsg::EasyResult => {}
         }
     }
 }
 
-impl JzeroMdl {
+impl SessionMdl {
     fn due_time(&self, question: &Question) -> DateTime<Utc> {
         match self.lesson_results.get(question) {
             Some(ref result) => result.due_time(),

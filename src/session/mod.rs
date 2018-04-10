@@ -9,7 +9,7 @@ mod draw;
 mod update;
 
 #[derive(Clone, PartialEq, Debug)]
-pub enum JzeroMsg {
+pub enum SessionMsg {
     ButtonBarMsg(ButtonBarMsg),
     ProceedToAnswer,
     ProceedToReview,
@@ -19,7 +19,7 @@ pub enum JzeroMsg {
 }
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct JzeroMdl {
+pub struct SessionMdl {
     button_bar_mdl: ButtonBarMdl,
     questions: Vec<Question>,
     active_lesson: Option<Lesson>,
@@ -67,9 +67,9 @@ pub enum LessonProgress {
     Review,
 }
 
-impl Default for JzeroMdl {
+impl Default for SessionMdl {
     fn default() -> Self {
-        JzeroMdl {
+        SessionMdl {
             button_bar_mdl: ButtonBarMdl::default(),
             questions: vec![
                 Question::Recall {
@@ -147,5 +147,5 @@ impl Default for JzeroMdl {
     }
 }
 
-impl Mdl<JzeroMsg> for JzeroMdl {}
+impl Mdl<SessionMsg> for SessionMdl {}
 
