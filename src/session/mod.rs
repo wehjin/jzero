@@ -19,8 +19,8 @@ pub enum SessionMsg {
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct SessionMdl {
-    button_bar_mdl: ButtonBarMdl,
-    session: Session,
+    pub button_bar_mdl: ButtonBarMdl,
+    pub session: Session,
 }
 
 impl Default for SessionMdl {

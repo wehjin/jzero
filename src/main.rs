@@ -18,7 +18,7 @@ mod domain;
 
 fn main() {
     window::start(768, 768, |window| {
-        let mdl = SessionMdl::default();
+        let mdl = SessionMdl { session: storage::load(), ..Default::default() };
         App::new(SessionMdl::update, SessionMdl::draw)
             .run("Jzero", mdl, window);
     });

@@ -74,7 +74,7 @@ pub fn draw_acquire(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson)
         buttons: vec![
             Button {
                 id: 38,
-                label: "Hard / Incorrect".into(),
+                label: "Hard or Wrong".into(),
                 intent: ButtonIntent::Call,
                 click_msg: SessionMsg::ProceedToReview,
             },
