@@ -8,13 +8,13 @@ impl Draw<SessionMsg> for SessionMdl {
         let palette = &Palette::default();
         if let Some(ref active_lesson) = self.session.active_lesson {
             let active_content = match active_lesson.progress {
-                LessonProgress::Perform => draw_perform(self, palette, active_lesson),
-                LessonProgress::Acquire => draw_acquire(self, palette, active_lesson),
+                LessonProgress::Test => draw_perform(self, palette, active_lesson),
+                LessonProgress::Learn => draw_acquire(self, palette, active_lesson),
                 LessonProgress::Review => draw_review(self, palette, active_lesson),
             };
             let active_index = match active_lesson.progress {
-                LessonProgress::Perform => 0,
-                LessonProgress::Acquire => 1,
+                LessonProgress::Test => 0,
+                LessonProgress::Learn => 1,
                 LessonProgress::Review => 2,
             };
             let stepper: Flood<SessionMsg> = Stepper {
@@ -31,8 +31,9 @@ impl Draw<SessionMsg> for SessionMdl {
 
             stepper + Padding::Uniform(Length::Spacing) + Flood::Color(palette.light_background)
         } else {
-            Flood::Text("Take a break".into(), palette.primary, Placement::Center)
-                + Padding::Uniform(Length::Cross * 0.4)
+            Flood::Text("Lessons are napping".into(), palette.primary, Placement::Center)
+                + Padding::Dual(Length::Full * 0.2, Length::Full * 0.45)
+                + Flood::Color(palette.light_background)
         }
     }
 }
@@ -62,7 +63,7 @@ pub fn draw_perform(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson)
 }
 
 const GOT_THIS: &str = "Good (Revisit in 2d)";
-const EASY: &str = "Easy (Revisit in 1w)";
+const EASY: &str = "Easy (Revisit in 5d)";
 
 pub fn draw_acquire(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SessionMsg> {
     let Question::Recall { ref english, ref kana, .. } = active_lesson.question;
@@ -74,7 +75,7 @@ pub fn draw_acquire(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson)
         buttons: vec![
             Button {
                 id: 38,
-                label: "Hard or Wrong".into(),
+                label: "Hard (Or Wrong)".into(),
                 intent: ButtonIntent::Call,
                 click_msg: SessionMsg::ProceedToReview,
             },
@@ -100,7 +101,7 @@ pub fn draw_acquire(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson)
 }
 
 pub fn draw_review(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SessionMsg> {
-    let title = "Say it again".into();
+    let title = "Review".into();
     let button_bar = ButtonBar {
         msg_wrap: SessionMsg::ButtonBarMsg,
         palette,
@@ -126,6 +127,7 @@ pub fn draw_review(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson) 
         format!("{} {}", full, "—")
     });
     Flood::Text(english.to_owned(), palette.light_background_text_primary, Placement::Start)
+        + (Position::Bottom(Length::Full * 0.2), Flood::Text("Say it aloud".into(), palette.primary, Placement::Start))
         + (Position::Bottom(Length::Full * 0.3), Flood::Text(prompt, palette.primary, Placement::Start))
         + Padding::Uniform(Length::Cross * 0.25)
         + (Position::Top(Length::Spacing * 2), Flood::Text(title, palette.light_background_text_primary, Placement::Start))

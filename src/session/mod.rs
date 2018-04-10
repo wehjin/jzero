@@ -1,8 +1,8 @@
-use ::domain::*;
-use ::traits::*;
 use chrono::prelude::*;
+use domain::*;
 use patchgl::material::components::button_bar::*;
 use patchgl::material::Palette;
+use patchgl::traits::*;
 
 mod draw;
 mod update;

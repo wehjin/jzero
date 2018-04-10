@@ -405,7 +405,7 @@ dependencies = [
 [[package]]
 name = "patchgl"
 version = "0.1.0"
-source = "git+https://github.com/wehjin/patchgl.git#4c157d96eb1330f203d500a6e7f0dfc6b236efe2"
+source = "git+https://github.com/wehjin/patchgl.git#50892cf62cf14a5b410485246c835db619636a2b"
 dependencies = [
  "arrayvec 0.3.25 (registry+https://github.com/rust-lang/crates.io-index)",
  "cage 0.1.0 (git+https://github.com/wehjin/rust-cage)",

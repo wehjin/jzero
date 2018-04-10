@@ -18,6 +18,8 @@ pub enum Question {
 #[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub enum LessonResult {
     Hard(DateTime<Utc>),
+    Good(DateTime<Utc>),
+    Easy(DateTime<Utc>),
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
@@ -28,9 +30,15 @@ pub struct Lesson {
 
 #[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub enum LessonProgress {
-    Perform,
-    Acquire,
+    Test,
+    Learn,
     Review,
+}
+
+impl Lesson {
+    pub fn new(question: Question) -> Self {
+        Lesson { question, progress: LessonProgress::Test }
+    }
 }
 
 impl Session {
@@ -44,20 +52,23 @@ impl Session {
     pub fn start_next_lesson(&mut self, now: DateTime<Utc>) {
         let candidates = self.find_active_questions(now);
         let next_lesson = if candidates.is_empty() {
-            self.active_lesson.clone()
+            match self.active_lesson {
+                Some(ref lesson) if self.wake_time_of_question(&lesson.question) <= now => Some(Lesson::new(lesson.question.clone())),
+                _ => None,
+            }
         } else {
             use rand::{Rng, thread_rng};
             let mut rng = thread_rng();
             let index = rng.gen_range(0, candidates.len());
             let question = candidates[index].clone();
-            Some(Lesson { question, progress: LessonProgress::Perform })
+            Some(Lesson { question, progress: LessonProgress::Test })
         };
         self.active_lesson = next_lesson;
     }
 
     fn find_active_questions(&self, time: DateTime<Utc>) -> Vec<Question> {
         let mut candidates = self.questions.iter()
-            .filter(|question| time >= self.due_time_of_question(question))
+            .filter(|question| time >= self.wake_time_of_question(question))
             .map(|it| it.clone())
             .collect::<Vec<_>>();
 
@@ -67,11 +78,11 @@ impl Session {
             }
         }
 
-        candidates.sort_by_key(|it| self.due_time_of_question(it));
+        candidates.sort_by_key(|it| self.wake_time_of_question(it));
         candidates
     }
 
-    fn due_time_of_question(&self, question: &Question) -> DateTime<Utc> {
+    fn wake_time_of_question(&self, question: &Question) -> DateTime<Utc> {
         use time::Duration;
         match self.lesson_results.get(question) {
             Some(ref lesson_result) => lesson_result.due_time(),
@@ -91,7 +102,7 @@ impl Default for Session {
                     kana: "くち".into(),
                     kanji: Some("口".into()),
                 },
-                progress: LessonProgress::Perform,
+                progress: LessonProgress::Test,
             }),
             lesson_results: HashMap::new(),
         }

@@ -7,12 +7,11 @@ extern crate serde_yaml;
 extern crate time;
 
 use patchgl::app::App;
+use patchgl::traits::*;
 use patchgl::window;
 use session::SessionMdl;
-use traits::*;
 
 mod session;
-mod traits;
 mod storage;
 mod domain;
 

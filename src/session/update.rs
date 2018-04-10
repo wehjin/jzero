@@ -7,7 +7,7 @@ impl Update<SessionMsg> for SessionMdl {
             SessionMsg::ButtonBarMsg(msg) => update_button_bar(&mut self.button_bar_mdl, msg),
             SessionMsg::ProceedToAnswer => {
                 if let &mut Some(ref mut lesson) = &mut self.session.active_lesson {
-                    lesson.progress = LessonProgress::Acquire;
+                    lesson.progress = LessonProgress::Learn;
                 }
             }
             SessionMsg::ProceedToReview => {
@@ -23,8 +23,22 @@ impl Update<SessionMsg> for SessionMdl {
                 use storage;
                 storage::save(&self.session);
             }
-            SessionMsg::GoodResult => {}
-            SessionMsg::EasyResult => {}
+            SessionMsg::GoodResult => {
+                let now = Utc::now();
+                self.session.finish_active_lesson_with_result(LessonResult::Good(now));
+                self.session.start_next_lesson(now);
+
+                use storage;
+                storage::save(&self.session);
+            }
+            SessionMsg::EasyResult => {
+                let now = Utc::now();
+                self.session.finish_active_lesson_with_result(LessonResult::Easy(now));
+                self.session.start_next_lesson(now);
+
+                use storage;
+                storage::save(&self.session);
+            }
         }
     }
 }
