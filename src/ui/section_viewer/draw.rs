@@ -106,7 +106,7 @@ fn draw_learn<MsgT, F>(section_mdl: &SectionViewerMdl, palette: &Palette, active
         F: Fn(SectionViewerMsg) -> MsgT + Send + Sync + 'static,
         MsgT: Clone + Send + Sync + 'static,
 {
-    let Question::Recall { ref english, ref kana, .. } = active_lesson.question;
+    let Question::Recall { ref english, ref kana, ref kanji, .. } = active_lesson.question;
     let title = format!("{}", english);
     let button_bar = ButtonBar {
         msg_wrap: {
@@ -139,7 +139,12 @@ fn draw_learn<MsgT, F>(section_mdl: &SectionViewerMdl, palette: &Palette, active
             }
         ],
     };
-    Flood::Text(kana.to_owned(), palette.primary, Placement::Start)
+    let answer = if let &Some(ref kanji) = kanji {
+        format!("{}, {}", kanji, kana)
+    } else {
+        kana.to_owned()
+    };
+    Flood::Text(answer, palette.primary, Placement::Start)
         + Padding::Uniform(Length::Cross * 0.35)
         + (Position::Top(Length::Spacing * 2), Flood::Text(title, palette.light_background_text_primary, Placement::Start))
         + Padding::Uniform(Length::Spacing * 3 / 2)

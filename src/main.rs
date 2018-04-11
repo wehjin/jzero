@@ -123,7 +123,7 @@ impl Draw<AppMsg> for AppMdl {
             picker_panel_items + Flood::Color(Color::custom_white(0.4))
         };
 
-        section_viewer + Padding::Behind(Length::CardApproach) + (Position::Left(Length::Full * 0.25), picker_panel)
+        section_viewer + (Position::Left(Length::Full * 0.25), picker_panel + Padding::Behind(Length::CardApproach))
     }
 }
 
