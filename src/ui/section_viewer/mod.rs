@@ -10,8 +10,8 @@ mod draw;
 pub struct SectionViewer<'a, MsgT, F>
     where F: Fn(SectionViewerMsg) -> MsgT + Send + Sync + 'static,
 {
-    pub section_viewer_msg_wrap: F,
-    pub section_viewer_mdl: &'a SectionViewerMdl,
+    pub msg_wrap: F,
+    pub mdl: &'a SectionViewerMdl,
     pub viewed_lesson_changed_msg: MsgT,
 }
 

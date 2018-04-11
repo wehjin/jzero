@@ -12,8 +12,8 @@ impl<'a, MsgT, F> Into<Flood<MsgT>> for SectionViewer<'a, MsgT, F> where
 {
     fn into(self) -> Flood<MsgT> {
         let palette = &Palette::default();
-        let section_msg_wrap = Arc::new(self.section_viewer_msg_wrap);
-        let section_mdl = self.section_viewer_mdl;
+        let section_msg_wrap = Arc::new(self.msg_wrap);
+        let section_mdl = self.mdl;
         let flood = if let Some(ref active_lesson) = section_mdl.section.active_lesson {
             let active_content = match active_lesson.progress {
                 LessonProgress::Start => draw_start(&section_mdl, palette, active_lesson, section_msg_wrap.clone()),
@@ -44,7 +44,7 @@ impl<'a, MsgT, F> Into<Flood<MsgT>> for SectionViewer<'a, MsgT, F> where
                 + Flood::Color(palette.light_background)
         };
         flood + Sensor::Signal(Signal {
-            id: self.section_viewer_mdl.id,
+            id: self.mdl.id,
             version: Version {
                 value: self.viewed_lesson_changed_msg.clone(),
                 counter: section_mdl.change_version_counter,

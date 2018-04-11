@@ -52,8 +52,8 @@ impl Update<AppMsg> for AppMdl {
 impl Draw<AppMsg> for AppMdl {
     fn draw(&self) -> Flood<AppMsg> {
         SectionViewer {
-            section_viewer_msg_wrap: AppMsg::SectionViewerMsgWrap,
-            section_viewer_mdl: &self.section_viewer_mdl,
+            msg_wrap: AppMsg::SectionViewerMsgWrap,
+            mdl: &self.section_viewer_mdl,
             viewed_lesson_changed_msg: AppMsg::Save,
         }.into()
     }
