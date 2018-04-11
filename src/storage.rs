@@ -47,11 +47,11 @@ fn save_string(folder: &PathBuf, file: &str, string: &String) {
 
 
 pub fn load() -> Section {
-    let mut session = Section::default();
+    let mut session = Section::vocab_group_a();
     session.active_lesson = None;
     if let Some(ref folder) = home_folder() {
         if let Some(ref string) = read_string(folder, QUESTIONS_FILE) {
-            session.questions = serde_yaml::from_str(string).unwrap_or(default_questions())
+            session.questions = serde_yaml::from_str(string).unwrap_or(vocab_group_a_questions())
         }
         if let Some(ref string) = read_string(folder, LESSON_RESULTS_FILE) {
             session.lesson_results = serde_yaml::from_str(string).unwrap_or(HashMap::new())

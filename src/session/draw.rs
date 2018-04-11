@@ -8,12 +8,12 @@ impl Draw<SessionMsg> for SessionMdl {
         let palette = &Palette::default();
         if let Some(ref active_lesson) = self.session.active_lesson {
             let active_content = match active_lesson.progress {
-                LessonProgress::Test => draw_perform(self, palette, active_lesson),
+                LessonProgress::Start => draw_perform(self, palette, active_lesson),
                 LessonProgress::Learn => draw_acquire(self, palette, active_lesson),
                 LessonProgress::Review => draw_review(self, palette, active_lesson),
             };
             let active_index = match active_lesson.progress {
-                LessonProgress::Test => 0,
+                LessonProgress::Start => 0,
                 LessonProgress::Learn => 1,
                 LessonProgress::Review => 2,
             };

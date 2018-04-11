@@ -27,7 +27,7 @@ impl Section {
             let mut rng = thread_rng();
             let index = rng.gen_range(0, candidates.len());
             let question = candidates[index].clone();
-            Some(Lesson { question, progress: LessonProgress::Test })
+            Some(Lesson { question, progress: LessonProgress::Start })
         };
         self.active_lesson = next_lesson;
     }
@@ -55,20 +55,15 @@ impl Section {
             None => Utc::now() - Duration::days(100),
         }
     }
-}
 
-impl Default for Section {
-    fn default() -> Self {
+    pub fn vocab_group_a() -> Self {
+        let questions = vocab_group_a_questions();
+        let active_question = questions[0].clone();
         Section {
-            questions: default_questions(),
+            questions,
             active_lesson: Some(Lesson {
-                question: Question::Recall {
-                    english: "mouth".into(),
-                    progressive: "kuchi".into(),
-                    kana: "くち".into(),
-                    kanji: Some("口".into()),
-                },
-                progress: LessonProgress::Test,
+                question: active_question,
+                progress: LessonProgress::Start,
             }),
             lesson_results: HashMap::new(),
         }

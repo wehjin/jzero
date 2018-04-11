@@ -8,6 +8,6 @@ pub struct Lesson {
 
 impl Lesson {
     pub fn new(question: Question) -> Self {
-        Lesson { question, progress: LessonProgress::Test }
+        Lesson { question, progress: LessonProgress::Start }
     }
 }

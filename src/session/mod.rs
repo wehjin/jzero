@@ -27,7 +27,7 @@ impl Default for SessionMdl {
     fn default() -> Self {
         SessionMdl {
             button_bar_mdl: ButtonBarMdl::default(),
-            session: Section::default(),
+            session: Section::vocab_group_a(),
         }
     }
 }

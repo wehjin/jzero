@@ -11,3 +11,4 @@ mod lesson_result;
 mod section;
 mod question;
 mod lesson_progress;
+mod course;
