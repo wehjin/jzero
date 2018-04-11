@@ -37,18 +37,25 @@ impl Default for SectionViewerMdl {
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum SectionViewerMsg {
-    ButtonBarMsg(ButtonBarMsg),
+    SetSection(Section),
     ProceedToAnswer,
     ProceedToReview,
     HardResult,
     GoodResult,
     EasyResult,
+    ButtonBarMsg(ButtonBarMsg),
 }
 
 impl Update<SectionViewerMsg> for SectionViewerMdl {
     fn update(&mut self, msg: SectionViewerMsg) {
         match msg {
-            SectionViewerMsg::ButtonBarMsg(msg) => update_button_bar(&mut self.button_bar_mdl, msg),
+            SectionViewerMsg::SetSection(section) => {
+                let mut section = section.clone();
+                if section.active_lesson.is_none() {
+                    section.start_next_lesson(Utc::now());
+                }
+                self.section = Some(section);
+            }
             SectionViewerMsg::ProceedToAnswer => {
                 if let Some(Section { active_lesson: Some(ref mut lesson), .. }) = self.section {
                     lesson.progress = LessonProgress::Learn;
@@ -68,6 +75,7 @@ impl Update<SectionViewerMsg> for SectionViewerMdl {
             SectionViewerMsg::EasyResult => {
                 self.finsh_and_restart_active_lesson(LessonResult::Easy(Utc::now()))
             }
+            SectionViewerMsg::ButtonBarMsg(msg) => update_button_bar(&mut self.button_bar_mdl, msg),
         }
     }
 }
