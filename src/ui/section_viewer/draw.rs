@@ -14,43 +14,57 @@ impl<'a, MsgT, F> Into<Flood<MsgT>> for SectionViewer<'a, MsgT, F> where
         let palette = &Palette::default();
         let section_msg_wrap = Arc::new(self.msg_wrap);
         let section_mdl = self.mdl;
-        let flood = if let Some(ref active_lesson) = section_mdl.section.active_lesson {
-            let active_content = match active_lesson.progress {
-                LessonProgress::Start => draw_start(&section_mdl, palette, active_lesson, section_msg_wrap.clone()),
-                LessonProgress::Learn => draw_learn(&section_mdl, palette, active_lesson, section_msg_wrap.clone()),
-                LessonProgress::Review => draw_review(&section_mdl, palette, active_lesson, section_msg_wrap.clone()),
-            };
-            let active_index = match active_lesson.progress {
-                LessonProgress::Start => 0,
-                LessonProgress::Learn => 1,
-                LessonProgress::Review => 2,
-            };
-            let stepper: Flood<MsgT> = Stepper {
-                palette,
-                id: vec![15],
-                active_index,
-                active_content,
-                steps: vec![
-                    Step { label: "Recall" },
-                    Step { label: "Remember" },
-                    Step { label: "Review" },
-                ],
-            }.into();
 
-            stepper + Padding::Uniform(Length::Spacing) + Flood::Color(palette.light_background)
+        if let Some(ref section) = section_mdl.section {
+            let flood = if let Some(ref active_lesson) = section.active_lesson {
+                let active_content = match active_lesson.progress {
+                    LessonProgress::Start => draw_start(&section_mdl, palette, active_lesson, section_msg_wrap.clone()),
+                    LessonProgress::Learn => draw_learn(&section_mdl, palette, active_lesson, section_msg_wrap.clone()),
+                    LessonProgress::Review => draw_review(&section_mdl, palette, active_lesson, section_msg_wrap.clone()),
+                };
+                let active_index = match active_lesson.progress {
+                    LessonProgress::Start => 0,
+                    LessonProgress::Learn => 1,
+                    LessonProgress::Review => 2,
+                };
+                let stepper: Flood<MsgT> = Stepper {
+                    palette,
+                    id: vec![15],
+                    active_index,
+                    active_content,
+                    steps: vec![
+                        Step { label: "Recall" },
+                        Step { label: "Remember" },
+                        Step { label: "Review" },
+                    ],
+                }.into();
+
+                stepper + Padding::Uniform(Length::Spacing) + Flood::Color(palette.light_background)
+            } else {
+                Flood::Text("Done for now".into(), palette.light_background_text_primary, Placement::Center)
+                    + (Position::Bottom(Length::Full * 0.4), Flood::Text("Lessons are napping".into(), palette.light_background_text_primary, Placement::Center))
+                    + Padding::Dual(Length::Full * 0.2, Length::Full * 0.45)
+                    + Flood::Color(palette.light_background)
+            };
+            flood + Sensor::Signal(Signal {
+                id: self.mdl.id,
+                version: Version {
+                    value: self.viewed_lesson_changed_msg.clone(),
+                    counter: section_mdl.change_version_counter,
+                },
+            })
         } else {
-            Flood::Text("Lessons are napping".into(), palette.primary, Placement::Center)
-                + Padding::Dual(Length::Full * 0.2, Length::Full * 0.45)
-                + Flood::Color(palette.light_background)
-        };
-        flood + Sensor::Signal(Signal {
-            id: self.mdl.id,
-            version: Version {
-                value: self.viewed_lesson_changed_msg.clone(),
-                counter: section_mdl.change_version_counter,
-            },
-        })
+            draw_empty(&palette)
+        }
     }
+}
+
+fn draw_empty<MsgT>(palette: &Palette) -> Flood<MsgT>
+    where MsgT: Clone + Send + Sync + 'static
+{
+    Flood::Text("Pick a section".into(), palette.light_background_text_disabled, Placement::Center)
+        + Padding::Dual(Length::Full * 0.2, Length::Full * 0.45)
+        + Flood::Color(palette.light_background)
 }
 
 fn draw_start<MsgT, F>(section_mdl: &SectionViewerMdl, palette: &Palette, active_lesson: &Lesson, section_msg_wrap: Arc<F>) -> Flood<MsgT>

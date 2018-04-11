@@ -18,7 +18,8 @@ mod ui;
 
 fn main() {
     window::start(768, 768, |window| {
-        let mdl = AppMdl { section_viewer_mdl: SectionViewerMdl { section: storage::load(), ..Default::default() } };
+        let section = Some(storage::load());
+        let mdl = AppMdl { section_viewer_mdl: SectionViewerMdl { section, ..Default::default() } };
         App::new(AppMdl::update, AppMdl::draw)
             .run("Jzero", mdl, window);
     });
@@ -43,7 +44,9 @@ impl Update<AppMsg> for AppMdl {
                 self.section_viewer_mdl.update(section_msg);
             }
             AppMsg::Save => {
-                storage::save(&self.section_viewer_mdl.section);
+                if let Some(ref section) = self.section_viewer_mdl.section {
+                    storage::save(section);
+                }
             }
         }
     }

@@ -19,7 +19,7 @@ pub struct SectionViewer<'a, MsgT, F>
 #[derive(Clone, PartialEq, Debug)]
 pub struct SectionViewerMdl {
     pub id: u64,
-    pub section: Section,
+    pub section: Option<Section>,
     pub button_bar_mdl: ButtonBarMdl,
     pub change_version_counter: VersionCounter,
 }
@@ -28,7 +28,7 @@ impl Default for SectionViewerMdl {
     fn default() -> Self {
         SectionViewerMdl {
             id: thread_rng().gen(),
-            section: Section::vocabulary_group_a(),
+            section: None,
             button_bar_mdl: ButtonBarMdl::default(),
             change_version_counter: VersionCounter::enabled_after_bump(),
         }
@@ -50,33 +50,34 @@ impl Update<SectionViewerMsg> for SectionViewerMdl {
         match msg {
             SectionViewerMsg::ButtonBarMsg(msg) => update_button_bar(&mut self.button_bar_mdl, msg),
             SectionViewerMsg::ProceedToAnswer => {
-                if let &mut Some(ref mut lesson) = &mut self.section.active_lesson {
+                if let Some(Section { active_lesson: Some(ref mut lesson), .. }) = self.section {
                     lesson.progress = LessonProgress::Learn;
                 }
             }
             SectionViewerMsg::ProceedToReview => {
-                if let &mut Some(ref mut lesson) = &mut self.section.active_lesson {
+                if let Some(Section { active_lesson: Some(ref mut lesson), .. }) = self.section {
                     lesson.progress = LessonProgress::Review;
                 }
             }
             SectionViewerMsg::HardResult => {
-                let now = Utc::now();
-                self.section.finish_active_lesson_with_result(LessonResult::Hard(now));
-                self.section.start_next_lesson(now);
-                self.change_version_counter.bump();
+                self.finsh_and_restart_active_lesson(LessonResult::Hard(Utc::now()))
             }
             SectionViewerMsg::GoodResult => {
-                let now = Utc::now();
-                self.section.finish_active_lesson_with_result(LessonResult::Good(now));
-                self.section.start_next_lesson(now);
-                self.change_version_counter.bump();
+                self.finsh_and_restart_active_lesson(LessonResult::Good(Utc::now()))
             }
             SectionViewerMsg::EasyResult => {
-                let now = Utc::now();
-                self.section.finish_active_lesson_with_result(LessonResult::Easy(now));
-                self.section.start_next_lesson(now);
-                self.change_version_counter.bump();
+                self.finsh_and_restart_active_lesson(LessonResult::Easy(Utc::now()))
             }
+        }
+    }
+}
+
+impl SectionViewerMdl {
+    fn finsh_and_restart_active_lesson(&mut self, result: LessonResult) -> () {
+        if let Some(ref mut section) = self.section {
+            section.finish_active_lesson_with_result(result);
+            section.start_next_lesson(Utc::now());
+            self.change_version_counter.bump();
         }
     }
 }
