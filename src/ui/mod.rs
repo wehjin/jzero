@@ -1,3 +1,2 @@
-pub mod section;
-
+pub mod app;
 pub mod course;

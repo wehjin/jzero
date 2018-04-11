@@ -3,10 +3,10 @@ use patchgl::material::components::button_bar::*;
 use patchgl::material::components::stepper::*;
 use super::*;
 
-impl Draw<SectionMsg> for SectionMdl {
-    fn draw(&self) -> Flood<SectionMsg> {
+impl Draw<AppMsg> for AppMdl {
+    fn draw(&self) -> Flood<AppMsg> {
         let palette = &Palette::default();
-        if let Some(ref active_lesson) = self.session.active_lesson {
+        let flood = if let Some(ref active_lesson) = self.session.active_lesson {
             let active_content = match active_lesson.progress {
                 LessonProgress::Start => draw_perform(self, palette, active_lesson),
                 LessonProgress::Learn => draw_acquire(self, palette, active_lesson),
@@ -17,7 +17,7 @@ impl Draw<SectionMsg> for SectionMdl {
                 LessonProgress::Learn => 1,
                 LessonProgress::Review => 2,
             };
-            let stepper: Flood<SectionMsg> = Stepper {
+            let stepper: Flood<AppMsg> = Stepper {
                 palette,
                 id: vec![15],
                 active_index,
@@ -34,14 +34,15 @@ impl Draw<SectionMsg> for SectionMdl {
             Flood::Text("Lessons are napping".into(), palette.primary, Placement::Center)
                 + Padding::Dual(Length::Full * 0.2, Length::Full * 0.45)
                 + Flood::Color(palette.light_background)
-        }
+        };
+        flood + Sensor::Signal(Signal { id: self.id, version: Version { value: AppMsg::Save, counter: self.save_version_counter } })
     }
 }
 
-pub fn draw_perform(mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SectionMsg> {
+pub fn draw_perform(mdl: &AppMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<AppMsg> {
     let title = "Say it aloud".into();
     let button_bar = ButtonBar {
-        msg_wrap: SectionMsg::ButtonBarMsg,
+        msg_wrap: AppMsg::ButtonBarMsg,
         palette,
         button_bar_mdl: &mdl.button_bar_mdl,
         buttons: vec![
@@ -49,7 +50,7 @@ pub fn draw_perform(mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson)
                 id: 38,
                 label: "Check Answer".into(),
                 intent: ButtonIntent::Call,
-                click_msg: SectionMsg::ProceedToAnswer,
+                click_msg: AppMsg::ProceedToAnswer,
             }
         ],
     };
@@ -65,11 +66,11 @@ pub fn draw_perform(mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson)
 const GOT_THIS: &str = "Good (Revisit in 2d)";
 const EASY: &str = "Easy (Revisit in 5d)";
 
-pub fn draw_acquire(mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SectionMsg> {
+pub fn draw_acquire(mdl: &AppMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<AppMsg> {
     let Question::Recall { ref english, ref kana, .. } = active_lesson.question;
     let title = format!("{}", english);
     let button_bar = ButtonBar {
-        msg_wrap: SectionMsg::ButtonBarMsg,
+        msg_wrap: AppMsg::ButtonBarMsg,
         palette,
         button_bar_mdl: &mdl.button_bar_mdl,
         buttons: vec![
@@ -77,19 +78,19 @@ pub fn draw_acquire(mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson)
                 id: 38,
                 label: "Hard (Or Wrong)".into(),
                 intent: ButtonIntent::Call,
-                click_msg: SectionMsg::ProceedToReview,
+                click_msg: AppMsg::ProceedToReview,
             },
             Button {
                 id: 40,
                 label: GOT_THIS.into(),
                 intent: ButtonIntent::Provide,
-                click_msg: SectionMsg::GoodResult,
+                click_msg: AppMsg::GoodResult,
             },
             Button {
                 id: 41,
                 label: EASY.into(),
                 intent: ButtonIntent::Provide,
-                click_msg: SectionMsg::EasyResult,
+                click_msg: AppMsg::EasyResult,
             }
         ],
     };
@@ -100,10 +101,10 @@ pub fn draw_acquire(mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson)
         + (Position::Bottom(Length::Spacing * 3), button_bar.into())
 }
 
-pub fn draw_review(mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SectionMsg> {
+pub fn draw_review(mdl: &AppMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<AppMsg> {
     let title = "Review".into();
     let button_bar = ButtonBar {
-        msg_wrap: SectionMsg::ButtonBarMsg,
+        msg_wrap: AppMsg::ButtonBarMsg,
         palette,
         button_bar_mdl: &mdl.button_bar_mdl,
         buttons: vec![
@@ -111,13 +112,13 @@ pub fn draw_review(mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson) 
                 id: 38,
                 label: "Next Question".into(),
                 intent: ButtonIntent::Call,
-                click_msg: SectionMsg::HardResult,
+                click_msg: AppMsg::HardResult,
             },
             Button {
                 id: 39,
                 label: "Back".into(),
                 intent: ButtonIntent::Provide,
-                click_msg: SectionMsg::ProceedToAnswer,
+                click_msg: AppMsg::ProceedToAnswer,
             },
         ],
     };
