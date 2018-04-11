@@ -6,14 +6,14 @@ use patchgl::material::Palette;
 use super::*;
 use domain::{LessonProgress, Question};
 
-impl<'a, MsgT, F> Into<Flood<MsgT>> for SectionElement<'a, MsgT, F> where
-    F: Fn(SectionMsg) -> MsgT + Send + Sync + 'static,
+impl<'a, MsgT, F> Into<Flood<MsgT>> for SectionViewer<'a, MsgT, F> where
+    F: Fn(SectionViewerMsg) -> MsgT + Send + Sync + 'static,
     MsgT: Clone + Send + Sync + 'static,
 {
     fn into(self) -> Flood<MsgT> {
         let palette = &Palette::default();
-        let section_msg_wrap = Arc::new(self.section_msg_wrap);
-        let section_mdl = self.section_mdl;
+        let section_msg_wrap = Arc::new(self.section_viewer_msg_wrap);
+        let section_mdl = self.section_viewer_mdl;
         let flood = if let Some(ref active_lesson) = section_mdl.section.active_lesson {
             let active_content = match active_lesson.progress {
                 LessonProgress::Start => draw_start(&section_mdl, palette, active_lesson, section_msg_wrap.clone()),
@@ -44,18 +44,18 @@ impl<'a, MsgT, F> Into<Flood<MsgT>> for SectionElement<'a, MsgT, F> where
                 + Flood::Color(palette.light_background)
         };
         flood + Sensor::Signal(Signal {
-            id: self.section_mdl.id,
+            id: self.section_viewer_mdl.id,
             version: Version {
-                value: self.change_msg.clone(),
+                value: self.viewed_lesson_changed_msg.clone(),
                 counter: section_mdl.change_version_counter,
             },
         })
     }
 }
 
-fn draw_start<MsgT, F>(section_mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson, section_msg_wrap: Arc<F>) -> Flood<MsgT>
+fn draw_start<MsgT, F>(section_mdl: &SectionViewerMdl, palette: &Palette, active_lesson: &Lesson, section_msg_wrap: Arc<F>) -> Flood<MsgT>
     where
-        F: Fn(SectionMsg) -> MsgT + Send + Sync + 'static,
+        F: Fn(SectionViewerMsg) -> MsgT + Send + Sync + 'static,
         MsgT: Clone + Send + Sync + 'static,
 {
     let title = "Say it aloud".into();
@@ -63,7 +63,7 @@ fn draw_start<MsgT, F>(section_mdl: &SectionMdl, palette: &Palette, active_lesso
         msg_wrap: {
             let section_msg_wrap = section_msg_wrap.clone();
             move |bar_msg: ButtonBarMsg| {
-                let section_msg = SectionMsg::ButtonBarMsg(bar_msg);
+                let section_msg = SectionViewerMsg::ButtonBarMsg(bar_msg);
                 section_msg_wrap(section_msg)
             }
         },
@@ -74,7 +74,7 @@ fn draw_start<MsgT, F>(section_mdl: &SectionMdl, palette: &Palette, active_lesso
                 id: 38,
                 label: "Check Answer".into(),
                 intent: ButtonIntent::Call,
-                click_msg: section_msg_wrap(SectionMsg::ProceedToAnswer),
+                click_msg: section_msg_wrap(SectionViewerMsg::ProceedToAnswer),
             }
         ],
     };
@@ -87,9 +87,9 @@ fn draw_start<MsgT, F>(section_mdl: &SectionMdl, palette: &Palette, active_lesso
         + (Position::Bottom(Length::Spacing * 3), button_bar.into())
 }
 
-fn draw_learn<MsgT, F>(section_mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson, section_msg_wrap: Arc<F>) -> Flood<MsgT>
+fn draw_learn<MsgT, F>(section_mdl: &SectionViewerMdl, palette: &Palette, active_lesson: &Lesson, section_msg_wrap: Arc<F>) -> Flood<MsgT>
     where
-        F: Fn(SectionMsg) -> MsgT + Send + Sync + 'static,
+        F: Fn(SectionViewerMsg) -> MsgT + Send + Sync + 'static,
         MsgT: Clone + Send + Sync + 'static,
 {
     let Question::Recall { ref english, ref kana, .. } = active_lesson.question;
@@ -98,7 +98,7 @@ fn draw_learn<MsgT, F>(section_mdl: &SectionMdl, palette: &Palette, active_lesso
         msg_wrap: {
             let section_msg_wrap = section_msg_wrap.clone();
             move |bar_msg: ButtonBarMsg| {
-                let section_msg = SectionMsg::ButtonBarMsg(bar_msg);
+                let section_msg = SectionViewerMsg::ButtonBarMsg(bar_msg);
                 section_msg_wrap(section_msg)
             }
         },
@@ -109,19 +109,19 @@ fn draw_learn<MsgT, F>(section_mdl: &SectionMdl, palette: &Palette, active_lesso
                 id: 38,
                 label: "Hard (Or Wrong)".into(),
                 intent: ButtonIntent::Call,
-                click_msg: (section_msg_wrap)(SectionMsg::ProceedToReview),
+                click_msg: (section_msg_wrap)(SectionViewerMsg::ProceedToReview),
             },
             Button {
                 id: 40,
                 label: GOT_THIS.into(),
                 intent: ButtonIntent::Provide,
-                click_msg: (section_msg_wrap)(SectionMsg::GoodResult),
+                click_msg: (section_msg_wrap)(SectionViewerMsg::GoodResult),
             },
             Button {
                 id: 41,
                 label: EASY.into(),
                 intent: ButtonIntent::Provide,
-                click_msg: (section_msg_wrap)(SectionMsg::EasyResult),
+                click_msg: (section_msg_wrap)(SectionViewerMsg::EasyResult),
             }
         ],
     };
@@ -132,9 +132,9 @@ fn draw_learn<MsgT, F>(section_mdl: &SectionMdl, palette: &Palette, active_lesso
         + (Position::Bottom(Length::Spacing * 3), button_bar.into())
 }
 
-pub fn draw_review<MsgT, F>(section_mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson, section_msg_wrap: Arc<F>) -> Flood<MsgT>
+pub fn draw_review<MsgT, F>(section_mdl: &SectionViewerMdl, palette: &Palette, active_lesson: &Lesson, section_msg_wrap: Arc<F>) -> Flood<MsgT>
     where
-        F: Fn(SectionMsg) -> MsgT + Send + Sync + 'static,
+        F: Fn(SectionViewerMsg) -> MsgT + Send + Sync + 'static,
         MsgT: Clone + Send + Sync + 'static,
 {
     let title = "Review".into();
@@ -142,7 +142,7 @@ pub fn draw_review<MsgT, F>(section_mdl: &SectionMdl, palette: &Palette, active_
         msg_wrap: {
             let section_msg_wrap = section_msg_wrap.clone();
             move |bar_msg: ButtonBarMsg| {
-                let section_msg = SectionMsg::ButtonBarMsg(bar_msg);
+                let section_msg = SectionViewerMsg::ButtonBarMsg(bar_msg);
                 section_msg_wrap(section_msg)
             }
         },
@@ -153,13 +153,13 @@ pub fn draw_review<MsgT, F>(section_mdl: &SectionMdl, palette: &Palette, active_
                 id: 38,
                 label: "Next Question".into(),
                 intent: ButtonIntent::Call,
-                click_msg: (section_msg_wrap)(SectionMsg::HardResult),
+                click_msg: (section_msg_wrap)(SectionViewerMsg::HardResult),
             },
             Button {
                 id: 39,
                 label: "Back".into(),
                 intent: ButtonIntent::Provide,
-                click_msg: (section_msg_wrap)(SectionMsg::ProceedToAnswer),
+                click_msg: (section_msg_wrap)(SectionViewerMsg::ProceedToAnswer),
             },
         ],
     };

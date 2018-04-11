@@ -10,7 +10,7 @@ use patchgl::app::App;
 use patchgl::flood::Flood;
 use patchgl::traits::{Draw, Mdl, Update};
 use patchgl::window;
-use ui::section::{SectionMdl, SectionElement, SectionMsg};
+use ui::section_viewer::{SectionViewerMdl, SectionViewer, SectionViewerMsg};
 
 mod storage;
 mod domain;
@@ -18,7 +18,7 @@ mod ui;
 
 fn main() {
     window::start(768, 768, |window| {
-        let mdl = AppMdl { section_mdl: SectionMdl { section: storage::load(), ..Default::default() } };
+        let mdl = AppMdl { section_viewer_mdl: SectionViewerMdl { section: storage::load(), ..Default::default() } };
         App::new(AppMdl::update, AppMdl::draw)
             .run("Jzero", mdl, window);
     });
@@ -27,23 +27,23 @@ fn main() {
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct AppMdl {
-    pub section_mdl: SectionMdl,
+    pub section_viewer_mdl: SectionViewerMdl,
 }
 
 impl Default for AppMdl {
     fn default() -> Self {
-        AppMdl { section_mdl: SectionMdl::default() }
+        AppMdl { section_viewer_mdl: SectionViewerMdl::default() }
     }
 }
 
 impl Update<AppMsg> for AppMdl {
     fn update(&mut self, msg: AppMsg) {
         match msg {
-            AppMsg::SectionMsgWrap(section_msg) => {
-                self.section_mdl.update(section_msg);
+            AppMsg::SectionViewerMsgWrap(section_msg) => {
+                self.section_viewer_mdl.update(section_msg);
             }
             AppMsg::Save => {
-                storage::save(&self.section_mdl.section);
+                storage::save(&self.section_viewer_mdl.section);
             }
         }
     }
@@ -51,10 +51,10 @@ impl Update<AppMsg> for AppMdl {
 
 impl Draw<AppMsg> for AppMdl {
     fn draw(&self) -> Flood<AppMsg> {
-        SectionElement {
-            section_msg_wrap: AppMsg::SectionMsgWrap,
-            section_mdl: &self.section_mdl,
-            change_msg: AppMsg::Save,
+        SectionViewer {
+            section_viewer_msg_wrap: AppMsg::SectionViewerMsgWrap,
+            section_viewer_mdl: &self.section_viewer_mdl,
+            viewed_lesson_changed_msg: AppMsg::Save,
         }.into()
     }
 }
@@ -63,6 +63,6 @@ impl Mdl<AppMsg> for AppMdl {}
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum AppMsg {
-    SectionMsgWrap(SectionMsg),
+    SectionViewerMsgWrap(SectionViewerMsg),
     Save,
 }
