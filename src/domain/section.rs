@@ -66,14 +66,10 @@ impl Section {
     }
 
     pub fn new(name: &str, questions: Vec<Question>) -> Section {
-        let active_question = questions[0].clone();
         Section {
             name: name.into(),
             questions,
-            active_lesson: Some(Lesson {
-                question: active_question,
-                progress: LessonProgress::Start,
-            }),
+            active_lesson: None,
             lesson_results: HashMap::new(),
         }
     }

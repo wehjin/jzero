@@ -4,20 +4,28 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use self::readwrite::*;
 
-pub fn save(session: &Section) {
+pub fn save(course: &Course) {
     use std::thread;
-    let session = session.clone();
+    let course = course.clone();
     thread::spawn(move || {
-        save_session(&session);
+        save_course(&course);
     });
 }
 
-fn save_session(session: &Section) {
-    if let Some(ref folder) = home_folder() {
-        if let Ok(string) = serde_yaml::to_string(&session.lesson_results) {
+fn save_course(course: &Course) {
+    match course.active_section {
+        Some(0) => save_section(&course.sections[0], vocab_a_folder()),
+        Some(1) => save_section(&course.sections[1], vocab_b_folder()),
+        _ => (),
+    }
+}
+
+fn save_section(section: &Section, folder: Option<PathBuf>) {
+    if let Some(ref folder) = folder {
+        if let Ok(string) = serde_yaml::to_string(&section.lesson_results) {
             write_string(folder, LESSON_RESULTS_FILE, &string);
         }
-        if let Ok(string) = serde_yaml::to_string(&session.questions) {
+        if let Ok(string) = serde_yaml::to_string(&section.questions) {
             write_string(folder, QUESTIONS_FILE, &string);
         }
     }

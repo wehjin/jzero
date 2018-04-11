@@ -55,8 +55,11 @@ impl Update<AppMsg> for AppMdl {
             }
             AppMsg::Save => {
                 if let Some(ref section) = self.section_viewer_mdl.section {
-                    storage::save(section);
+                    if let Some(index) = self.course.active_section {
+                        self.course.sections[index] = section.clone();
+                    }
                 }
+                storage::save(&self.course);
             }
             AppMsg::ButtonMsgWrap(id, button_msg) => {
                 let button_mdls = &mut self.button_mdls;
@@ -76,7 +79,8 @@ impl Update<AppMsg> for AppMdl {
                     }
                 }
                 self.course.active_section = Some(index);
-                self.section_viewer_mdl.update(SectionViewerMsg::SetSection(self.course.sections[index].clone()));
+                let section = self.course.sections[index].clone();
+                self.section_viewer_mdl.update(SectionViewerMsg::SetSection(section));
             }
         }
     }

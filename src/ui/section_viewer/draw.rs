@@ -144,8 +144,8 @@ fn draw_learn<MsgT, F>(section_mdl: &SectionViewerMdl, palette: &Palette, active
     } else {
         kana.to_owned()
     };
-    Flood::Text(answer, palette.primary, Placement::Start)
-        + Padding::Uniform(Length::Cross * 0.35)
+    Flood::Text(answer, palette.primary, Placement::Center)
+        + Padding::Dual(Length::Full * 0.1, Length::Full * 0.35)
         + (Position::Top(Length::Spacing * 2), Flood::Text(title, palette.light_background_text_primary, Placement::Start))
         + Padding::Uniform(Length::Spacing * 3 / 2)
         + (Position::Bottom(Length::Spacing * 3), button_bar.into())
