@@ -8,11 +8,12 @@ pub struct Course {
 }
 
 impl Course {
-    pub fn jzero() -> Self {
+    pub fn course() -> Self {
         Course {
             name: "Jzero".into(),
             sections: vec![
                 Section::vocabulary_group_a(),
+                Section::vocabulary_group_b(),
             ],
             active_section: None,
         }

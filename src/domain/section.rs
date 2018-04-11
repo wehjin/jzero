@@ -58,10 +58,17 @@ impl Section {
     }
 
     pub fn vocabulary_group_a() -> Self {
-        let questions = vocabulary_group_a_questions();
+        Section::section("Vocabulary Group A", vocabulary_group_a_questions())
+    }
+
+    pub fn vocabulary_group_b() -> Self {
+        Section::section("Vocabulary Group B", vocabulary_group_b_questions())
+    }
+
+    fn section(name: &str, questions: Vec<Question>) -> Section {
         let active_question = questions[0].clone();
         Section {
-            name: "Vocabulary Group A".into(),
+            name: name.into(),
             questions,
             active_lesson: Some(Lesson {
                 question: active_question,
