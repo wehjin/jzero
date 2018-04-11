@@ -8,9 +8,10 @@ extern crate time;
 
 use patchgl::app::App;
 use patchgl::flood::Flood;
-use patchgl::traits::{Draw, Mdl, Update};
+use patchgl::traits::{Draw, Update};
 use patchgl::window;
 use ui::section_viewer::{SectionViewerMdl, SectionViewer, SectionViewerMsg};
+use domain::Course;
 
 mod storage;
 mod domain;
@@ -18,23 +19,26 @@ mod ui;
 
 fn main() {
     window::start(768, 768, |window| {
-        let section = Some(storage::load());
-        let mdl = AppMdl { section_viewer_mdl: SectionViewerMdl { section, ..Default::default() } };
+        let app_mdl = AppMdl {
+            course: storage::load_course(),
+            section_viewer_mdl: SectionViewerMdl::default(),
+        };
         App::new(AppMdl::update, AppMdl::draw)
-            .run("Jzero", mdl, window);
+            .run("Jzero", app_mdl, window);
     });
 }
 
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct AppMdl {
+    pub course: Course,
     pub section_viewer_mdl: SectionViewerMdl,
 }
 
-impl Default for AppMdl {
-    fn default() -> Self {
-        AppMdl { section_viewer_mdl: SectionViewerMdl::default() }
-    }
+#[derive(Clone, PartialEq, Debug)]
+pub enum AppMsg {
+    SectionViewerMsgWrap(SectionViewerMsg),
+    Save,
 }
 
 impl Update<AppMsg> for AppMdl {
@@ -62,10 +66,3 @@ impl Draw<AppMsg> for AppMdl {
     }
 }
 
-impl Mdl<AppMsg> for AppMdl {}
-
-#[derive(Clone, PartialEq, Debug)]
-pub enum AppMsg {
-    SectionViewerMsgWrap(SectionViewerMsg),
-    Save,
-}

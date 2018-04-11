@@ -4,7 +4,7 @@ use super::*;
 pub struct Course {
     pub name: String,
     pub sections: Vec<Section>,
-    pub active_section: Option<Section>,
+    pub active_section: Option<usize>,
 }
 
 impl Course {
