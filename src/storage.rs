@@ -7,7 +7,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-pub fn save(session: &Session) {
+pub fn save(session: &Section) {
     use std::thread;
     let session = session.clone();
     thread::spawn(move || {
@@ -15,7 +15,7 @@ pub fn save(session: &Session) {
     });
 }
 
-fn save_session(session: &Session) {
+fn save_session(session: &Section) {
     if let Some(ref folder) = home_folder() {
         if let Ok(string) = serde_yaml::to_string(&session.lesson_results) {
             save_string(folder, LESSON_RESULTS_FILE, &string);
@@ -46,8 +46,8 @@ fn save_string(folder: &PathBuf, file: &str, string: &String) {
 }
 
 
-pub fn load() -> Session {
-    let mut session = Session::default();
+pub fn load() -> Section {
+    let mut session = Section::default();
     session.active_lesson = None;
     if let Some(ref folder) = home_folder() {
         if let Some(ref string) = read_string(folder, QUESTIONS_FILE) {

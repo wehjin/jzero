@@ -20,14 +20,14 @@ pub enum SessionMsg {
 #[derive(Clone, PartialEq, Debug)]
 pub struct SessionMdl {
     pub button_bar_mdl: ButtonBarMdl,
-    pub session: Session,
+    pub session: Section,
 }
 
 impl Default for SessionMdl {
     fn default() -> Self {
         SessionMdl {
             button_bar_mdl: ButtonBarMdl::default(),
-            session: Session::default(),
+            session: Section::default(),
         }
     }
 }
