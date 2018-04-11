@@ -1,2 +1,2 @@
-pub mod app;
+pub mod section;
 pub mod course;

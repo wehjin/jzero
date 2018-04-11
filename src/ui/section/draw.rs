@@ -1,23 +1,31 @@
-use patchgl::flood::*;
-use patchgl::material::components::button_bar::*;
+use std::sync::Arc;
+use patchgl::flood::{Flood, Length, Signal, Version, Padding, Position, Placement, Sensor};
+use patchgl::material::components::button_bar::ButtonBar;
 use patchgl::material::components::stepper::*;
+use patchgl::material::Palette;
 use super::*;
+use domain::{LessonProgress, Question};
 
-impl Draw<AppMsg> for AppMdl {
-    fn draw(&self) -> Flood<AppMsg> {
+impl<'a, MsgT, F> Into<Flood<MsgT>> for SectionElement<'a, MsgT, F> where
+    F: Fn(SectionMsg) -> MsgT + Send + Sync + 'static,
+    MsgT: Clone + Send + Sync + 'static,
+{
+    fn into(self) -> Flood<MsgT> {
         let palette = &Palette::default();
-        let flood = if let Some(ref active_lesson) = self.session.active_lesson {
+        let section_msg_wrap = Arc::new(self.section_msg_wrap);
+        let section_mdl = self.section_mdl;
+        let flood = if let Some(ref active_lesson) = section_mdl.section.active_lesson {
             let active_content = match active_lesson.progress {
-                LessonProgress::Start => draw_perform(self, palette, active_lesson),
-                LessonProgress::Learn => draw_acquire(self, palette, active_lesson),
-                LessonProgress::Review => draw_review(self, palette, active_lesson),
+                LessonProgress::Start => draw_start(&section_mdl, palette, active_lesson, section_msg_wrap.clone()),
+                LessonProgress::Learn => draw_learn(&section_mdl, palette, active_lesson, section_msg_wrap.clone()),
+                LessonProgress::Review => draw_review(&section_mdl, palette, active_lesson, section_msg_wrap.clone()),
             };
             let active_index = match active_lesson.progress {
                 LessonProgress::Start => 0,
                 LessonProgress::Learn => 1,
                 LessonProgress::Review => 2,
             };
-            let stepper: Flood<AppMsg> = Stepper {
+            let stepper: Flood<MsgT> = Stepper {
                 palette,
                 id: vec![15],
                 active_index,
@@ -35,22 +43,38 @@ impl Draw<AppMsg> for AppMdl {
                 + Padding::Dual(Length::Full * 0.2, Length::Full * 0.45)
                 + Flood::Color(palette.light_background)
         };
-        flood + Sensor::Signal(Signal { id: self.id, version: Version { value: AppMsg::Save, counter: self.save_version_counter } })
+        flood + Sensor::Signal(Signal {
+            id: self.section_mdl.id,
+            version: Version {
+                value: self.change_msg.clone(),
+                counter: section_mdl.change_version_counter,
+            },
+        })
     }
 }
 
-pub fn draw_perform(mdl: &AppMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<AppMsg> {
+fn draw_start<MsgT, F>(section_mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson, section_msg_wrap: Arc<F>) -> Flood<MsgT>
+    where
+        F: Fn(SectionMsg) -> MsgT + Send + Sync + 'static,
+        MsgT: Clone + Send + Sync + 'static,
+{
     let title = "Say it aloud".into();
     let button_bar = ButtonBar {
-        msg_wrap: AppMsg::ButtonBarMsg,
+        msg_wrap: {
+            let section_msg_wrap = section_msg_wrap.clone();
+            move |bar_msg: ButtonBarMsg| {
+                let section_msg = SectionMsg::ButtonBarMsg(bar_msg);
+                section_msg_wrap(section_msg)
+            }
+        },
         palette,
-        button_bar_mdl: &mdl.button_bar_mdl,
+        button_bar_mdl: &section_mdl.button_bar_mdl,
         buttons: vec![
             Button {
                 id: 38,
                 label: "Check Answer".into(),
                 intent: ButtonIntent::Call,
-                click_msg: AppMsg::ProceedToAnswer,
+                click_msg: section_msg_wrap(SectionMsg::ProceedToAnswer),
             }
         ],
     };
@@ -63,34 +87,41 @@ pub fn draw_perform(mdl: &AppMdl, palette: &Palette, active_lesson: &Lesson) -> 
         + (Position::Bottom(Length::Spacing * 3), button_bar.into())
 }
 
-const GOT_THIS: &str = "Good (Revisit in 2d)";
-const EASY: &str = "Easy (Revisit in 5d)";
-
-pub fn draw_acquire(mdl: &AppMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<AppMsg> {
+fn draw_learn<MsgT, F>(section_mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson, section_msg_wrap: Arc<F>) -> Flood<MsgT>
+    where
+        F: Fn(SectionMsg) -> MsgT + Send + Sync + 'static,
+        MsgT: Clone + Send + Sync + 'static,
+{
     let Question::Recall { ref english, ref kana, .. } = active_lesson.question;
     let title = format!("{}", english);
     let button_bar = ButtonBar {
-        msg_wrap: AppMsg::ButtonBarMsg,
+        msg_wrap: {
+            let section_msg_wrap = section_msg_wrap.clone();
+            move |bar_msg: ButtonBarMsg| {
+                let section_msg = SectionMsg::ButtonBarMsg(bar_msg);
+                section_msg_wrap(section_msg)
+            }
+        },
         palette,
-        button_bar_mdl: &mdl.button_bar_mdl,
+        button_bar_mdl: &section_mdl.button_bar_mdl,
         buttons: vec![
             Button {
                 id: 38,
                 label: "Hard (Or Wrong)".into(),
                 intent: ButtonIntent::Call,
-                click_msg: AppMsg::ProceedToReview,
+                click_msg: (section_msg_wrap)(SectionMsg::ProceedToReview),
             },
             Button {
                 id: 40,
                 label: GOT_THIS.into(),
                 intent: ButtonIntent::Provide,
-                click_msg: AppMsg::GoodResult,
+                click_msg: (section_msg_wrap)(SectionMsg::GoodResult),
             },
             Button {
                 id: 41,
                 label: EASY.into(),
                 intent: ButtonIntent::Provide,
-                click_msg: AppMsg::EasyResult,
+                click_msg: (section_msg_wrap)(SectionMsg::EasyResult),
             }
         ],
     };
@@ -101,24 +132,34 @@ pub fn draw_acquire(mdl: &AppMdl, palette: &Palette, active_lesson: &Lesson) -> 
         + (Position::Bottom(Length::Spacing * 3), button_bar.into())
 }
 
-pub fn draw_review(mdl: &AppMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<AppMsg> {
+pub fn draw_review<MsgT, F>(section_mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson, section_msg_wrap: Arc<F>) -> Flood<MsgT>
+    where
+        F: Fn(SectionMsg) -> MsgT + Send + Sync + 'static,
+        MsgT: Clone + Send + Sync + 'static,
+{
     let title = "Review".into();
     let button_bar = ButtonBar {
-        msg_wrap: AppMsg::ButtonBarMsg,
+        msg_wrap: {
+            let section_msg_wrap = section_msg_wrap.clone();
+            move |bar_msg: ButtonBarMsg| {
+                let section_msg = SectionMsg::ButtonBarMsg(bar_msg);
+                section_msg_wrap(section_msg)
+            }
+        },
         palette,
-        button_bar_mdl: &mdl.button_bar_mdl,
+        button_bar_mdl: &section_mdl.button_bar_mdl,
         buttons: vec![
             Button {
                 id: 38,
                 label: "Next Question".into(),
                 intent: ButtonIntent::Call,
-                click_msg: AppMsg::HardResult,
+                click_msg: (section_msg_wrap)(SectionMsg::HardResult),
             },
             Button {
                 id: 39,
                 label: "Back".into(),
                 intent: ButtonIntent::Provide,
-                click_msg: AppMsg::ProceedToAnswer,
+                click_msg: (section_msg_wrap)(SectionMsg::ProceedToAnswer),
             },
         ],
     };
@@ -135,3 +176,6 @@ pub fn draw_review(mdl: &AppMdl, palette: &Palette, active_lesson: &Lesson) -> F
         + Padding::Uniform(Length::Spacing * 3 / 2)
         + (Position::Bottom(Length::Spacing * 3), button_bar.into())
 }
+
+const GOT_THIS: &str = "Good (Revisit in 2d)";
+const EASY: &str = "Easy (Revisit in 5d)";
