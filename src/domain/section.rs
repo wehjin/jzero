@@ -2,6 +2,7 @@ use super::*;
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Section {
+    pub name: String,
     pub questions: Vec<Question>,
     pub active_lesson: Option<Lesson>,
     pub lesson_results: HashMap<Question, LessonResult>,
@@ -56,10 +57,11 @@ impl Section {
         }
     }
 
-    pub fn vocab_group_a() -> Self {
-        let questions = vocab_group_a_questions();
+    pub fn vocabulary_group_a() -> Self {
+        let questions = vocabulary_group_a_questions();
         let active_question = questions[0].clone();
         Section {
+            name: "Vocabulary Group A".into(),
             questions,
             active_lesson: Some(Lesson {
                 question: active_question,

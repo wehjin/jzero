@@ -3,7 +3,7 @@ pub enum Question {
     Recall { english: String, progressive: String, kana: String, kanji: Option<String> }
 }
 
-pub fn vocab_group_a_questions() -> Vec<Question> {
+pub fn vocabulary_group_a_questions() -> Vec<Question> {
     vec![
         Question::Recall {
             english: "mouth".into(),
