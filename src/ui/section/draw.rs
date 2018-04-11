@@ -3,8 +3,8 @@ use patchgl::material::components::button_bar::*;
 use patchgl::material::components::stepper::*;
 use super::*;
 
-impl Draw<SessionMsg> for SessionMdl {
-    fn draw(&self) -> Flood<SessionMsg> {
+impl Draw<SectionMsg> for SectionMdl {
+    fn draw(&self) -> Flood<SectionMsg> {
         let palette = &Palette::default();
         if let Some(ref active_lesson) = self.session.active_lesson {
             let active_content = match active_lesson.progress {
@@ -17,7 +17,7 @@ impl Draw<SessionMsg> for SessionMdl {
                 LessonProgress::Learn => 1,
                 LessonProgress::Review => 2,
             };
-            let stepper: Flood<SessionMsg> = Stepper {
+            let stepper: Flood<SectionMsg> = Stepper {
                 palette,
                 id: vec![15],
                 active_index,
@@ -38,10 +38,10 @@ impl Draw<SessionMsg> for SessionMdl {
     }
 }
 
-pub fn draw_perform(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SessionMsg> {
+pub fn draw_perform(mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SectionMsg> {
     let title = "Say it aloud".into();
     let button_bar = ButtonBar {
-        msg_wrap: SessionMsg::ButtonBarMsg,
+        msg_wrap: SectionMsg::ButtonBarMsg,
         palette,
         button_bar_mdl: &mdl.button_bar_mdl,
         buttons: vec![
@@ -49,7 +49,7 @@ pub fn draw_perform(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson)
                 id: 38,
                 label: "Check Answer".into(),
                 intent: ButtonIntent::Call,
-                click_msg: SessionMsg::ProceedToAnswer,
+                click_msg: SectionMsg::ProceedToAnswer,
             }
         ],
     };
@@ -65,11 +65,11 @@ pub fn draw_perform(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson)
 const GOT_THIS: &str = "Good (Revisit in 2d)";
 const EASY: &str = "Easy (Revisit in 5d)";
 
-pub fn draw_acquire(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SessionMsg> {
+pub fn draw_acquire(mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SectionMsg> {
     let Question::Recall { ref english, ref kana, .. } = active_lesson.question;
     let title = format!("{}", english);
     let button_bar = ButtonBar {
-        msg_wrap: SessionMsg::ButtonBarMsg,
+        msg_wrap: SectionMsg::ButtonBarMsg,
         palette,
         button_bar_mdl: &mdl.button_bar_mdl,
         buttons: vec![
@@ -77,19 +77,19 @@ pub fn draw_acquire(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson)
                 id: 38,
                 label: "Hard (Or Wrong)".into(),
                 intent: ButtonIntent::Call,
-                click_msg: SessionMsg::ProceedToReview,
+                click_msg: SectionMsg::ProceedToReview,
             },
             Button {
                 id: 40,
                 label: GOT_THIS.into(),
                 intent: ButtonIntent::Provide,
-                click_msg: SessionMsg::GoodResult,
+                click_msg: SectionMsg::GoodResult,
             },
             Button {
                 id: 41,
                 label: EASY.into(),
                 intent: ButtonIntent::Provide,
-                click_msg: SessionMsg::EasyResult,
+                click_msg: SectionMsg::EasyResult,
             }
         ],
     };
@@ -100,10 +100,10 @@ pub fn draw_acquire(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson)
         + (Position::Bottom(Length::Spacing * 3), button_bar.into())
 }
 
-pub fn draw_review(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SessionMsg> {
+pub fn draw_review(mdl: &SectionMdl, palette: &Palette, active_lesson: &Lesson) -> Flood<SectionMsg> {
     let title = "Review".into();
     let button_bar = ButtonBar {
-        msg_wrap: SessionMsg::ButtonBarMsg,
+        msg_wrap: SectionMsg::ButtonBarMsg,
         palette,
         button_bar_mdl: &mdl.button_bar_mdl,
         buttons: vec![
@@ -111,13 +111,13 @@ pub fn draw_review(mdl: &SessionMdl, palette: &Palette, active_lesson: &Lesson) 
                 id: 38,
                 label: "Next Question".into(),
                 intent: ButtonIntent::Call,
-                click_msg: SessionMsg::HardResult,
+                click_msg: SectionMsg::HardResult,
             },
             Button {
                 id: 39,
                 label: "Back".into(),
                 intent: ButtonIntent::Provide,
-                click_msg: SessionMsg::ProceedToAnswer,
+                click_msg: SectionMsg::ProceedToAnswer,
             },
         ],
     };

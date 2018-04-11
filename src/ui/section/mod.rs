@@ -8,7 +8,24 @@ mod draw;
 mod update;
 
 #[derive(Clone, PartialEq, Debug)]
-pub enum SessionMsg {
+pub struct SectionMdl {
+    pub button_bar_mdl: ButtonBarMdl,
+    pub session: Section,
+}
+
+impl Default for SectionMdl {
+    fn default() -> Self {
+        SectionMdl {
+            button_bar_mdl: ButtonBarMdl::default(),
+            session: Section::vocabulary_group_a(),
+        }
+    }
+}
+
+impl Mdl<SectionMsg> for SectionMdl {}
+
+#[derive(Clone, PartialEq, Debug)]
+pub enum SectionMsg {
     ButtonBarMsg(ButtonBarMsg),
     ProceedToAnswer,
     ProceedToReview,
@@ -16,21 +33,3 @@ pub enum SessionMsg {
     GoodResult,
     EasyResult,
 }
-
-#[derive(Clone, PartialEq, Debug)]
-pub struct SessionMdl {
-    pub button_bar_mdl: ButtonBarMdl,
-    pub session: Section,
-}
-
-impl Default for SessionMdl {
-    fn default() -> Self {
-        SessionMdl {
-            button_bar_mdl: ButtonBarMdl::default(),
-            session: Section::vocabulary_group_a(),
-        }
-    }
-}
-
-impl Mdl<SessionMsg> for SessionMdl {}
-

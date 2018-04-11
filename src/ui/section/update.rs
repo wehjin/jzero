@@ -1,21 +1,21 @@
 use super::*;
 
-impl Update<SessionMsg> for SessionMdl {
-    fn update(&mut self, msg: SessionMsg) {
+impl Update<SectionMsg> for SectionMdl {
+    fn update(&mut self, msg: SectionMsg) {
         println!("Msg: {:?}\n  Mdl: {:?}", msg, self);
         match msg {
-            SessionMsg::ButtonBarMsg(msg) => update_button_bar(&mut self.button_bar_mdl, msg),
-            SessionMsg::ProceedToAnswer => {
+            SectionMsg::ButtonBarMsg(msg) => update_button_bar(&mut self.button_bar_mdl, msg),
+            SectionMsg::ProceedToAnswer => {
                 if let &mut Some(ref mut lesson) = &mut self.session.active_lesson {
                     lesson.progress = LessonProgress::Learn;
                 }
             }
-            SessionMsg::ProceedToReview => {
+            SectionMsg::ProceedToReview => {
                 if let &mut Some(ref mut lesson) = &mut self.session.active_lesson {
                     lesson.progress = LessonProgress::Review;
                 }
             }
-            SessionMsg::HardResult => {
+            SectionMsg::HardResult => {
                 let now = Utc::now();
                 self.session.finish_active_lesson_with_result(LessonResult::Hard(now));
                 self.session.start_next_lesson(now);
@@ -23,7 +23,7 @@ impl Update<SessionMsg> for SessionMdl {
                 use storage;
                 storage::save(&self.session);
             }
-            SessionMsg::GoodResult => {
+            SectionMsg::GoodResult => {
                 let now = Utc::now();
                 self.session.finish_active_lesson_with_result(LessonResult::Good(now));
                 self.session.start_next_lesson(now);
@@ -31,7 +31,7 @@ impl Update<SessionMsg> for SessionMdl {
                 use storage;
                 storage::save(&self.session);
             }
-            SessionMsg::EasyResult => {
+            SectionMsg::EasyResult => {
                 let now = Utc::now();
                 self.session.finish_active_lesson_with_result(LessonResult::Easy(now));
                 self.session.start_next_lesson(now);
