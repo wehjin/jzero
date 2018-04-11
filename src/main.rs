@@ -18,7 +18,7 @@ mod domain;
 mod ui;
 
 fn main() {
-    window::start(768, 768, |window| {
+    window::start(1024, 768, |window| {
         let app_mdl = AppMdl {
             course: storage::load_course(),
             section_viewer_mdl: SectionViewerMdl::default(),
@@ -58,11 +58,32 @@ impl Update<AppMsg> for AppMdl {
 
 impl Draw<AppMsg> for AppMdl {
     fn draw(&self) -> Flood<AppMsg> {
-        SectionViewer {
+        use patchgl::material::Palette;
+        use patchgl::flood::*;
+
+        let palette = &Palette::default();
+
+        let section_viewer: Flood<AppMsg> = SectionViewer {
             msg_wrap: AppMsg::SectionViewerMsgWrap,
             mdl: &self.section_viewer_mdl,
             viewed_lesson_changed_msg: AppMsg::Save,
-        }.into()
+        }.into();
+
+        let picker_panel = {
+            let picker_panel_items = {
+                let items = self.course.sections.iter().map(|section| {
+                    Flood::Text(section.name.to_owned(), palette.dark_background_text_primary, Placement::Start)
+                        + Padding::Uniform(Length::Spacing)
+                }).rev().enumerate().collect::<Vec<_>>();
+
+                items.into_iter().fold(Flood::Color(palette.transparent), |panel, (_i, item)| {
+                    panel + (Position::Top(Length::Spacing * 4), item)
+                })
+            };
+            picker_panel_items + Flood::Color(palette.dark_background)
+        };
+
+        section_viewer + Padding::Behind(Length::CardApproach) + (Position::Left(Length::Full * 0.25), picker_panel)
     }
 }
 
