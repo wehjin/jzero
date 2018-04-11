@@ -1,7 +1,13 @@
-use ::domain::LessonResult;
 use chrono::prelude::*;
 use time::Duration;
 
+
+#[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
+pub enum LessonResult {
+    Hard(DateTime<Utc>),
+    Good(DateTime<Utc>),
+    Easy(DateTime<Utc>),
+}
 
 impl LessonResult {
     pub fn time(&self) -> DateTime<Utc> {

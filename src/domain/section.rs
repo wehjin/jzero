@@ -1,5 +1,12 @@
 use super::*;
 
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+pub struct Section {
+    pub questions: Vec<Question>,
+    pub active_lesson: Option<Lesson>,
+    pub lesson_results: HashMap<Question, LessonResult>,
+}
+
 impl Section {
     pub fn finish_active_lesson_with_result(&mut self, result: LessonResult) {
         if let Some(lesson) = self.active_lesson.clone() {
