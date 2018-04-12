@@ -7,10 +7,9 @@ extern crate serde_yaml;
 extern crate time;
 
 use std::collections::HashMap;
-use patchgl::app::App;
+use patchgl::app;
 use patchgl::flood::Flood;
 use patchgl::traits::{Draw, Update};
-use patchgl::window;
 use patchgl::button;
 use ui::section_viewer::{SectionViewerMdl, SectionViewer, SectionViewerMsg};
 use domain::Course;
@@ -20,15 +19,12 @@ mod domain;
 mod ui;
 
 fn main() {
-    window::start(1024, 768, |window| {
-        let app_mdl = AppMdl {
-            course: storage::load_course(),
-            section_viewer_mdl: SectionViewerMdl::default(),
-            button_mdls: HashMap::new(),
-        };
-        App::new(AppMdl::update, AppMdl::draw)
-            .run("Jzero", app_mdl, window);
-    });
+    let model = AppMdl {
+        course: storage::load_course(),
+        section_viewer_mdl: SectionViewerMdl::default(),
+        button_mdls: HashMap::new(),
+    };
+    app::run(1024, 768, "Jzero", model);
 }
 
 
